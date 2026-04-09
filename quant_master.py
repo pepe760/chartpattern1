@@ -693,7 +693,7 @@ class BacktestEngine:
 class ExportEngine:
     @staticmethod
     def plot_stage_analysis(all_results: List[Dict], save_path: str = 'stage_analysis.png'):
-        valid_results = [r for r in all_results if r['total_trades'] > 0]
+        valid_results = [r for r in all_results if r.get('total_trades', 0) > 0]
         if not valid_results: return
         patterns = [r['pattern'] for r in valid_results]
         fig, axes = plt.subplots(2, 2, figsize=(18, 12))
@@ -717,11 +717,10 @@ class ExportEngine:
         plt.savefig(save_path, dpi=150, bbox_inches='tight')
         plt.close()
 
-  @staticmethod
+    @staticmethod
     def export_to_zip(all_results: List[Dict], filename: str = 'quant_master_results_sp500.zip'):
         print(f"\n📦 Preparing export bundle: {filename}")
         
-        # 【修正版】：使用 .get('trades', []) 安全地獲取清單，如果沒有 trades 也不會崩潰
         all_trades = []
         for r in all_results:
             trades_list = r.get('trades', [])
@@ -731,18 +730,17 @@ class ExportEngine:
             pd.DataFrame(all_trades).to_csv('all_trades.csv', index=False)
             print(f"  📝 成功彙整 {len(all_trades)} 筆交易紀錄。")
         else:
-            print("  ⚠️ 警告：沒有偵測到任何交易紀錄，將不會建立 CSV。")
+            print("  ⚠️ 警告：沒有偵測到任何交易紀錄。")
             
         with zipfile.ZipFile(filename, 'w') as zipf:
             if os.path.exists('all_trades.csv'):
                 zipf.write('all_trades.csv')
                 os.remove('all_trades.csv')
             
-            # 打包所有產生的圖片
-            png_files = [f for f in os.listdir('.') if f.endswith('.png')]
-            for f in png_files:
-                zipf.write(f)
-                
+            # 打包所有的圖片檔案
+            for f in os.listdir('.'):
+                if f.endswith('.png'):
+                    zipf.write(f)
         print(f"  ✅ 打包完成！檔名：{filename}")
       
 # ╔══════════════════════════════════════════════════════════════════════════════╗
