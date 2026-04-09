@@ -7,14 +7,14 @@ on:
 jobs:
   run-backtest:
     runs-on: ubuntu-latest # 使用免費的 Linux 伺服器
-    timeout-minutes: 360 # 允許最多執行 6 小時 (預防 500 檔股票跑太久被中斷)
+    timeout-minutes: 360 # 允許最多執行 6 小時
 
     steps:
     - name: 下載程式碼
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4 # 已更新至 v4
 
     - name: 設定 Python 環境
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5 # 已更新至 v5
       with:
         python-version: '3.10'
 
@@ -27,8 +27,8 @@ jobs:
       run: python quant_master.py
 
     - name: 保存打包好的 ZIP 檔案
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4 # 已更新至 v4 (解決報錯的關鍵)
       with:
         name: Quant-Master-Results
         path: quant_master_results_sp500.zip
-        retention-days: 7 # 檔案會在 GitHub 停留 7 天供你下載
+        retention-days: 7
